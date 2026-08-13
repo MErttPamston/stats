@@ -52,7 +52,7 @@
       "pddCorrect": "19",
       "pddTime": "120",
       "pddDnf": false,
-      "manTime": "",
+      "manTime": "320",
       "manDnf": false,
       "manErrors": "2",
       "pddErrors": "1"
