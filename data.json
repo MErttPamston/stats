@@ -5,7 +5,7 @@
       "name": "Иван Иванов Иванович",
       "pddCorrect": "20",
       "pddTime": "140",
-      "pddDnf": true,
+      "pddDnf": false,
       "manCones": "12",
       "manTime": "120",
       "manDnf": false
