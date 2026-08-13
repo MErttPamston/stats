@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Итоги соревнований по автомногоборью</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --asphalt: #15181d;
+    --asphalt-2: #1d2128;
+    --asphalt-3: #262b33;
+    --line: #3a4049;
+    --chalk: #edeef0;
+    --chalk-dim: #9aa1ab;
+    --amber: #f2b807;
+    --amber-dim: #8a6a1a;
+    --red: #e2503a;
+    --green: #4caf7d;
+    --gold: #f2b807;
+    --silver: #c7cdd6;
+    --bronze: #c47a3f;
+    --radius: 4px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      repeating-linear-gradient(90deg, transparent 0 46px, rgba(255,255,255,0.02) 46px 48px),
+      var(--asphalt);
+    color:var(--chalk);
+    font-family:'IBM Plex Mono', monospace;
+    min-height:100vh;
+  }
+  h1,h2,h3,.display{
+    font-family:'Oswald', sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+  }
+
+  /* ---------- lane-line divider ---------- */
+  .lane-line{
+    height:3px;
+    background-image: repeating-linear-gradient(90deg, var(--amber) 0 28px, transparent 28px 48px);
+    opacity:0.9;
+  }
+
+  /* ---------- LOGIN SCREEN ---------- */
+  #login-screen{
+    position:fixed; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--asphalt);
+    z-index:50;
+  }
+  .login-card{
+    width:min(360px, 90vw);
+    background:var(--asphalt-2);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:36px 30px 30px;
+    position:relative;
+    overflow:hidden;
+  }
+  .login-card::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; height:5px;
+    background: linear-gradient(90deg, var(--red) 33%, var(--amber) 33% 66%, var(--green) 66%);
+  }
+  .signal-dots{
+    display:flex; gap:8px; margin-bottom:18px;
+  }
+  .signal-dots span{
+    width:10px; height:10px; border-radius:50%;
+    background:var(--line);
+  }
+  .signal-dots span:nth-child(1){background:var(--red); box-shadow:0 0 8px rgba(226,80,58,0.6);}
+  .signal-dots span:nth-child(2){background:var(--amber); box-shadow:0 0 8px rgba(242,184,7,0.5);}
+  .signal-dots span:nth-child(3){background:var(--line);}
+  .login-card h1{
+    font-size:22px; margin:0 0 4px; color:var(--chalk);
+  }
+  .login-card p.sub{
+    font-family:'IBM Plex Mono', monospace;
+    color:var(--chalk-dim); font-size:12.5px; margin:0 0 22px; letter-spacing:0.02em;
+  }
+  .field-label{
+    display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.08em;
+    color:var(--chalk-dim); margin-bottom:6px;
+  }
+  #login-screen input[type="password"]{
+    width:100%; padding:11px 12px; border-radius:var(--radius);
+    border:1px solid var(--line); background:var(--asphalt);
+    color:var(--chalk); font-family:'IBM Plex Mono', monospace; font-size:14px;
+    outline:none;
+  }
+  #login-screen input[type="password"]:focus{border-color:var(--amber);}
+  .login-btn{
+    margin-top:18px; width:100%; padding:12px; border-radius:var(--radius);
+    border:none; background:var(--amber); color:#1a1500; font-weight:700;
+    font-family:'Oswald',sans-serif; letter-spacing:0.06em; text-transform:uppercase;
+    font-size:14px; cursor:pointer;
+  }
+  .login-btn:hover{background:#ffcb2b;}
+  .login-error{
+    color:var(--red); font-size:12px; margin-top:10px; min-height:14px;
+  }
+
+  /* ---------- APP SHELL ---------- */
+  #app{display:none;}
+  header.top{
+    padding:26px 28px 20px;
+    display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:14px;
+  }
+  header.top .title-block h1{
+    font-size:26px; margin:0; color:var(--chalk);
+  }
+  header.top .title-block p{
+    margin:6px 0 0; color:var(--chalk-dim); font-size:12.5px; letter-spacing:0.02em;
+  }
+  .rules-strip{
+    display:flex; gap:18px; flex-wrap:wrap;
+    font-size:11.5px; color:var(--chalk-dim);
+  }
+  .rules-strip b{color:var(--amber); font-weight:600;}
+  .logout-btn{
+    background:none; border:1px solid var(--line); color:var(--chalk-dim);
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:8px 14px;
+    border-radius:var(--radius); cursor:pointer; letter-spacing:0.03em;
+  }
+  .logout-btn:hover{border-color:var(--red); color:var(--red);}
+
+  main{padding:0 28px 60px;}
+
+  .tabs{
+    display:flex; gap:2px; margin:18px 0 0;
+  }
+  .tab-btn{
+    font-family:'Oswald', sans-serif; text-transform:uppercase; letter-spacing:0.05em;
+    font-size:13.5px; padding:10px 22px; background:var(--asphalt-2);
+    border:1px solid var(--line); border-bottom:none; color:var(--chalk-dim);
+    cursor:pointer; border-radius:4px 4px 0 0;
+  }
+  .tab-btn.active{
+    background:var(--asphalt-3); color:var(--amber); border-color:var(--amber-dim);
+  }
+
+  .panel{
+    display:none;
+    background:var(--asphalt-3);
+    border:1px solid var(--line);
+    border-radius:0 4px 4px 4px;
+    padding:20px;
+  }
+  .panel.active{display:block;}
+
+  .table-scroll{overflow-x:auto;}
+  table.results{
+    border-collapse:collapse;
+    width:100%;
+    min-width:1080px;
+    font-size:12.5px;
+  }
+  table.results th, table.results td{
+    border:1px solid var(--line);
+    padding:8px 8px;
+    text-align:center;
+    vertical-align:middle;
+  }
+  table.results thead tr.group-row th{
+    background:var(--asphalt-2);
+    color:var(--chalk-dim);
+    font-family:'Oswald', sans-serif;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    font-size:11px;
+    font-weight:600;
+    padding:8px;
+  }
+  table.results thead tr.group-row th.g-pdd{color:var(--amber);}
+  table.results thead tr.group-row th.g-man{color:#7fb8e8;}
+  table.results thead tr.sub-row th{
+    background:var(--asphalt-2);
+    color:var(--chalk-dim);
+    font-weight:400;
+    font-size:11px;
+    font-family:'IBM Plex Mono', monospace;
+  }
+  table.results td.name-cell{text-align:left; min-width:170px;}
+  table.results input[type="text"], table.results input[type="number"]{
+    width:100%; background:var(--asphalt);
+    border:1px solid var(--line); border-radius:3px;
+    color:var(--chalk); font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px; padding:6px 6px; text-align:center;
+  }
+  table.results td.name-cell input{text-align:left;}
+  table.results input:focus{outline:none; border-color:var(--amber);}
+  table.results input[type="number"]::-webkit-inner-spin-button{opacity:0.4;}
+
+  td.auto{color:var(--chalk-dim); font-variant-numeric:tabular-nums;}
+  td.auto.strong{color:var(--chalk); font-weight:600;}
+  td.total-cell{
+    font-family:'Oswald', sans-serif; font-size:15px; font-weight:600;
+    color:var(--chalk); font-variant-numeric:tabular-nums;
+  }
+  td.place-cell{
+    font-family:'Oswald', sans-serif; font-size:16px; font-weight:700;
+  }
+
+  tr.dnf-row{opacity:0.85;}
+  .dnf-toggle{
+    display:flex; align-items:center; gap:5px; justify-content:center;
+    font-size:10px; color:var(--chalk-dim); margin-top:4px;
+  }
+  .dnf-toggle input{width:auto;}
+
+  tr.place-1 td{background:rgba(242,184,7,0.10);}
+  tr.place-1 td.place-cell{color:var(--gold);}
+  tr.place-2 td{background:rgba(199,205,214,0.07);}
+  tr.place-2 td.place-cell{color:var(--silver);}
+  tr.place-3 td{background:rgba(196,122,63,0.09);}
+  tr.place-3 td.place-cell{color:var(--bronze);}
+
+  .row-actions{
+    margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+  }
+  .btn{
+    font-family:'IBM Plex Mono', monospace; font-size:12px;
+    padding:9px 16px; border-radius:4px; cursor:pointer;
+    border:1px solid var(--line); background:var(--asphalt-2); color:var(--chalk);
+  }
+  .btn:hover{border-color:var(--amber); color:var(--amber);}
+  .btn.danger:hover{border-color:var(--red); color:var(--red);}
+  .btn.primary{background:var(--amber); color:#1a1500; border-color:var(--amber); font-weight:600;}
+  .btn.primary:hover{background:#ffcb2b;}
+
+  .save-note{
+    font-size:11px; color:var(--chalk-dim); margin-left:auto;
+  }
+  .save-note.flash{color:var(--green);}
+
+  .row-del-btn{
+    background:none; border:1px solid var(--line); color:var(--chalk-dim);
+    width:26px; height:26px; border-radius:4px; cursor:pointer;
+    font-family:'IBM Plex Mono', monospace; font-size:13px; line-height:1;
+  }
+  .row-del-btn:hover{border-color:var(--red); color:var(--red); background:rgba(226,80,58,0.08);}
+  .btn.primary:disabled{opacity:0.4; cursor:not-allowed;}
+  .btn.primary:disabled:hover{background:var(--amber); color:#1a1500;}
+
+  footer.legend{
+    margin-top:22px; font-size:11px; color:var(--chalk-dim);
+    display:flex; gap:22px; flex-wrap:wrap;
+  }
+  .legend-dot{display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; vertical-align:middle;}
+
+  @media (max-width:640px){
+    header.top{padding:20px 16px 14px;}
+    main{padding:0 12px 40px;}
+    .rules-strip{display:none;}
+  }
+
+  /* ---------- SYNC STATUS + HEADER ACTIONS ---------- */
+  .header-actions{display:flex; align-items:center; gap:14px;}
+  .sync-status{font-size:11px; color:var(--chalk-dim); display:flex; align-items:center; gap:6px; white-space:nowrap;}
+  .sync-status .dot{width:7px; height:7px; border-radius:50%; background:var(--chalk-dim); flex:none;}
+  .sync-status.ok .dot{background:var(--green); box-shadow:0 0 6px rgba(76,175,125,0.6);}
+  .sync-status.pending .dot{background:var(--amber); box-shadow:0 0 6px rgba(242,184,7,0.6);}
+  .sync-status.err .dot{background:var(--red); box-shadow:0 0 6px rgba(226,80,58,0.6);}
+  .sync-status.ok{color:var(--green);}
+  .sync-status.pending{color:var(--amber);}
+  .sync-status.err{color:var(--red);}
+  .refresh-btn{
+    background:none; border:1px solid var(--line); color:var(--chalk-dim);
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:8px 14px;
+    border-radius:var(--radius); cursor:pointer; letter-spacing:0.03em;
+  }
+  .refresh-btn:hover{border-color:var(--amber); color:var(--amber);}
+
+  /* ---------- CONTROLS: SEARCH / FILTER / SORT ---------- */
+  .controls-bar{
+    display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px;
+  }
+  .controls-bar input[type="text"]{
+    background:var(--asphalt); border:1px solid var(--line); color:var(--chalk);
+    padding:9px 11px; border-radius:var(--radius); font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px; min-width:220px; outline:none;
+  }
+  .controls-bar input[type="text"]:focus{border-color:var(--amber);}
+  .controls-bar select{
+    background:var(--asphalt); border:1px solid var(--line); color:var(--chalk);
+    padding:9px 11px; border-radius:var(--radius); font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px; outline:none; cursor:pointer;
+  }
+  .controls-bar select:focus{border-color:var(--amber);}
+  .controls-bar .clear-btn{
+    background:none; border:1px solid var(--line); color:var(--chalk-dim);
+    font-size:11.5px; padding:9px 12px; border-radius:var(--radius); cursor:pointer;
+    font-family:'IBM Plex Mono', monospace;
+  }
+  .controls-bar .clear-btn:hover{border-color:var(--red); color:var(--red);}
+
+  th.sortable{cursor:pointer; user-select:none;}
+  th.sortable:hover{color:var(--amber);}
+  .sort-arrow{opacity:0.55; font-size:9px; margin-left:4px;}
+  .sort-arrow.active{opacity:1; color:var(--amber);}
+</style>
+</head>
+<body>
+
+  <!-- ===================== LOGIN ===================== -->
+  <div id="login-screen">
+    <form class="login-card" id="login-form" autocomplete="off">
+      <div class="signal-dots"><span></span><span></span><span></span></div>
+      <h1>Итоги соревнований</h1>
+      <p class="sub">Автомногоборье · ПДД + скоростное маневрирование</p>
+      <label class="field-label" for="pw-input">Пароль доступа</label>
+      <input type="password" id="pw-input" placeholder="••••••••" autofocus>
+      <button type="submit" class="login-btn">Войти</button>
+      <div class="login-error" id="login-error"></div>
+    </form>
+  </div>
+
+  <!-- ===================== APP ===================== -->
+  <div id="app">
+    <header class="top">
+      <div class="title-block">
+        <h1>Итоги соревнований</h1>
+        <p>Личный зачёт · ПДД + скоростное маневрирование</p>
+      </div>
+      <div class="rules-strip">
+        <div><b>Штраф ПДД</b> — 20 сек / неверный ответ</div>
+        <div><b>Штраф манёвр</b> — 20 сек / сбитый конус</div>
+        <div><b>Невыполнение</b> — фикс. 100 сек</div>
+      </div>
+      <div class="header-actions">
+        <span class="sync-status" id="sync-status"><span class="dot"></span><span id="sync-status-text">—</span></span>
+        <button class="refresh-btn" id="refresh-btn" title="Подтянуть последние данные с GitHub">Обновить</button>
+        <button class="logout-btn" id="logout-btn">Выйти</button>
+      </div>
+    </header>
+    <div class="lane-line"></div>
+
+    <main>
+      <div class="tabs">
+        <button class="tab-btn active" data-gender="men">Мужчины</button>
+        <button class="tab-btn" data-gender="women">Женщины</button>
+      </div>
+
+      <div class="panel active" id="panel-men"></div>
+      <div class="panel" id="panel-women"></div>
+
+      <footer class="legend">
+        <span><span class="legend-dot" style="background:var(--gold)"></span>1 место</span>
+        <span><span class="legend-dot" style="background:var(--silver)"></span>2 место</span>
+        <span><span class="legend-dot" style="background:var(--bronze)"></span>3 место</span>
+        <span>Данные общие для всех — хранятся в GitHub-репозитории <a href="https://github.com/MErttPamston/stats" target="_blank" rel="noopener" style="color:var(--chalk-dim);">MErttPamston/stats</a></span>
+      </footer>
+    </main>
+  </div>
+
+<script>
+/* ============================================================
+   ПАРОЛЬ ДОСТУПА
+   ============================================================ */
+const SITE_PASSWORD = "qwerty";
+
+/* ============================================================
+   СИНХРОНИЗАЦИЯ ЧЕРЕЗ ПРОКСИ-ВОРКЕР (Cloudflare Worker)
+   Данные хранятся в файле data.json в GitHub-репозитории, но
+   страница больше НЕ обращается к GitHub API напрямую и не хранит
+   токен доступа. Вместо этого она обращается к вашему собственному
+   Cloudflare Worker, который держит токен в секретах на сервере
+   и сам читает/пишет data.json в GitHub.
+
+   ВАЖНО: укажите ниже адрес вашего развёрнутого воркера
+   (например: https://results-proxy.ваш-логин.workers.dev/data).
+   Как развернуть воркер — см. файл worker.js и инструкцию к нему.
+   ============================================================ */
+const WORKER_URL = "https://wild-sound-74dc.qqweilove.workers.dev/";
+
+async function githubGetFile(){
+  const res = await fetch(`${WORKER_URL}?_=${Date.now()}`);
+  if(!res.ok) throw new Error("PROXY_GET_" + res.status);
+  const data = await res.json();
+  if(data === null) return null;
+  if(data.error) throw new Error(data.error);
+  return { json: data.json, sha: data.sha };
+}
+
+async function githubPutFile(jsonObj, sha){
+  const res = await fetch(WORKER_URL, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ json: jsonObj, sha, password: SITE_PASSWORD })
+  });
+  if(!res.ok){
+    const err = await res.json().catch(() => ({}));
+    const e = new Error("PROXY_PUT_" + res.status + (err.message ? " " + err.message : ""));
+    e.status = res.status;
+    throw e;
+  }
+  const data = await res.json();
+  return { content: { sha: data.sha } };
+}
+
+/* ============================================================
+   ДАННЫЕ И КОНСТАНТЫ ТАБЛИЦЫ
+   ============================================================ */
+const PENALTY_PDD = 20;   // сек за один неверный ответ ПДД
+const PENALTY_CONE = 20;  // сек за один сбитый конус
+const DNF_PENALTY = 100;  // сек за невыполнение упражнения
+const MAX_ROWS = 7;
+const CORRECT_MAX = 20;   // максимум правильных ответов ПДД
+
+function genId(){
+  return "r" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+const emptyRow = () => ({
+  id: genId(),
+  name: "",
+  pddCorrect: "", pddTime: "", pddDnf: false,
+  manCones: "", manTime: "", manDnf: false
+});
+
+function normalizeGenderList(list){
+  if(!Array.isArray(list) || !list.length) return Array.from({length:3}, emptyRow);
+  return list.map(r => ({ ...r, id: r.id || genId() }));
+}
+
+/* очистка ввода числовых полей: цифры и максимум одна точка */
+function sanitizeNumeric(raw, fieldName){
+  let v = String(raw).replace(/[^0-9.]/g, "");
+  const firstDot = v.indexOf(".");
+  if(firstDot !== -1){
+    v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, "");
+  }
+  if(fieldName === "pddCorrect" && v !== ""){
+    const n = parseFloat(v);
+    if(!isNaN(n) && n > CORRECT_MAX) v = String(CORRECT_MAX);
+  }
+  return v;
+}
+
+let state = {
+  men: Array.from({length:3}, emptyRow),
+  women: Array.from({length:3}, emptyRow)
+};
+let currentSha = null;
+let saveTimer = null;
+let isSaving = false;
+let isDirty = false;
+
+/* UI state: поиск / фильтр / сортировка — отдельно для каждой вкладки */
+const uiState = {
+  men:   { search: "", filter: "all", sortField: null, sortDir: 1 },
+  women: { search: "", filter: "all", sortField: null, sortDir: 1 }
+};
+
+/* ============================================================
+   СТАТУС СИНХРОНИЗАЦИИ
+   ============================================================ */
+function setSyncStatus(text, kind){
+  const wrap = document.getElementById("sync-status");
+  const label = document.getElementById("sync-status-text");
+  if(!wrap || !label) return;
+  wrap.classList.remove("ok", "pending", "err");
+  if(kind) wrap.classList.add(kind);
+  label.textContent = text;
+}
+
+/* ============================================================
+   ЗАГРУЗКА / СОХРАНЕНИЕ ЧЕРЕЗ GITHUB
+   ============================================================ */
+async function initData(){
+  setSyncStatus("Загрузка из GitHub…", "pending");
+  try{
+    const result = await githubGetFile();
+    if(result){
+      state = {
+        men: normalizeGenderList(result.json.men),
+        women: normalizeGenderList(result.json.women)
+      };
+      currentSha = result.sha;
+      setSyncStatus("Синхронизировано", "ok");
+    } else {
+      // файла ещё нет в репозитории — создаём его
+      state = {
+        men: Array.from({length:3}, emptyRow),
+        women: Array.from({length:3}, emptyRow)
+      };
+      const putRes = await githubPutFile(state, null);
+      currentSha = putRes.content.sha;
+      setSyncStatus("Файл data.json создан в репозитории", "ok");
+    }
+  }catch(e){
+    console.error(e);
+    setSyncStatus("Не удалось загрузить данные (проверьте токен/репозиторий)", "err");
+  }
+  renderAll();
+}
+
+function scheduleSave(){
+  isDirty = true;
+  setSyncStatus("Есть несохранённые изменения…", "pending");
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(doSave, 900);
+}
+
+async function doSave(retry){
+  if(isSaving){ saveTimer = setTimeout(doSave, 500); return; }
+  isSaving = true;
+  setSyncStatus("Сохранение в GitHub…", "pending");
+  try{
+    const res = await githubPutFile(state, currentSha);
+    currentSha = res.content.sha;
+    isDirty = false;
+    setSyncStatus("Сохранено в GitHub", "ok");
+  }catch(e){
+    console.error(e);
+    if(e.status === 409 && !retry){
+      // кто-то другой сохранил данные раньше — подтягиваем актуальный sha и пробуем ещё раз
+      try{
+        const fresh = await githubGetFile();
+        if(fresh) currentSha = fresh.sha;
+        isSaving = false;
+        await doSave(true);
+        return;
+      }catch(e2){
+        console.error(e2);
+        setSyncStatus("Ошибка сохранения (конфликт версий)", "err");
+      }
+    } else {
+      setSyncStatus("Ошибка сохранения — изменения только локально", "err");
+    }
+  } finally {
+    isSaving = false;
+  }
+}
+
+async function manualRefresh(){
+  if(isDirty){
+    const ok = confirm("Есть несохранённые изменения — они будут потеряны при обновлении. Продолжить?");
+    if(!ok) return;
+  }
+  setSyncStatus("Обновление…", "pending");
+  try{
+    const result = await githubGetFile();
+    if(result){
+      state = {
+        men: normalizeGenderList(result.json.men),
+        women: normalizeGenderList(result.json.women)
+      };
+      currentSha = result.sha;
+      isDirty = false;
+      setSyncStatus("Синхронизировано", "ok");
+      renderAll();
+    }
+  }catch(e){
+    console.error(e);
+    setSyncStatus("Не удалось обновить данные", "err");
+  }
+}
+
+/* ============================================================
+   ВЫЧИСЛЕНИЯ
+   ============================================================ */
+function num(v){
+  const n = parseFloat(v);
+  return isNaN(n) ? null : n;
+}
+
+function computeRow(row){
+  let pddTotal = null;
+  if(row.pddDnf){
+    pddTotal = DNF_PENALTY;
+  } else {
+    const correct = num(row.pddCorrect);
+    const time = num(row.pddTime);
+    if(correct !== null && time !== null){
+      const errors = Math.max(0, CORRECT_MAX - correct);
+      pddTotal = time + errors * PENALTY_PDD;
+    }
+  }
+  let manTotal = null;
+  if(row.manDnf){
+    manTotal = DNF_PENALTY;
+  } else {
+    const cones = num(row.manCones);
+    const time = num(row.manTime);
+    if(cones !== null && time !== null){
+      manTotal = time + cones * PENALTY_CONE;
+    }
+  }
+  const overall = (pddTotal !== null && manTotal !== null) ? pddTotal + manTotal : null;
+  return { pddTotal, manTotal, overall };
+}
+
+/* ============================================================
+   РЕНДЕР ПАНЕЛИ (с поиском, фильтром и сортировкой)
+   ============================================================ */
+const SORT_FIELDS = {
+  name:  { label: "ФИО", cmp: (a, b) => a.row.name.localeCompare(b.row.name, "ru") },
+  pdd:   { label: "Итог ПДД", cmp: (a, b) => a.c.pddTotal - b.c.pddTotal, nullField: r => r.c.pddTotal },
+  man:   { label: "Итог манёвр", cmp: (a, b) => a.c.manTotal - b.c.manTotal, nullField: r => r.c.manTotal },
+  total: { label: "Общее время", cmp: (a, b) => a.c.overall - b.c.overall, nullField: r => r.c.overall },
+  place: { label: "Место", cmp: (a, b) => a.place - b.place, nullField: r => r.place }
+};
+
+/* Готовые пресеты сортировки для выпадающего списка (поле + направление) */
+const SORT_PRESETS = [
+  { value: "",            label: "Без сортировки" },
+  { value: "name:1",      label: "ФИО: А → Я" },
+  { value: "name:-1",     label: "ФИО: Я → А" },
+  { value: "place:1",     label: "Место: сначала лучшие" },
+  { value: "place:-1",    label: "Место: сначала худшие" },
+  { value: "total:1",     label: "Общее время: по возрастанию" },
+  { value: "total:-1",    label: "Общее время: по убыванию" },
+  { value: "pdd:1",       label: "Итог ПДД: по возрастанию" },
+  { value: "man:1",       label: "Итог манёвр: по возрастанию" }
+];
+
+/* Расширенный список фильтров по разным категориям */
+const FILTER_OPTIONS = [
+  { value: "all",          label: "Все участники" },
+  { value: "finished",     label: "Только финишировавшие" },
+  { value: "dnf",          label: "Только DNF (любой этап)" },
+  { value: "dnf-pdd",      label: "DNF по ПДД" },
+  { value: "dnf-man",      label: "DNF по манёвру" },
+  { value: "pdd-perfect",  label: "ПДД без ошибок" },
+  { value: "pdd-errors",   label: "ПДД с ошибками" },
+  { value: "man-clean",    label: "Манёвр без сбитых конусов" },
+  { value: "man-cones",    label: "Есть сбитые конусы" },
+  { value: "podium",       label: "Призёры (1–3 место)" },
+  { value: "no-place",     label: "Без места (нет результата)" },
+  { value: "has-data",     label: "Есть введённые данные" },
+  { value: "no-data",      label: "Пустые строки (без данных)" }
+];
+
+function applyFilter(display, filterValue){
+  switch(filterValue){
+    case "finished":
+      return display.filter(d => !d.row.pddDnf && !d.row.manDnf);
+    case "dnf":
+      return display.filter(d => d.row.pddDnf || d.row.manDnf);
+    case "dnf-pdd":
+      return display.filter(d => d.row.pddDnf);
+    case "dnf-man":
+      return display.filter(d => d.row.manDnf);
+    case "pdd-perfect":
+      return display.filter(d => !d.row.pddDnf && num(d.row.pddCorrect) === CORRECT_MAX);
+    case "pdd-errors":
+      return display.filter(d => !d.row.pddDnf && num(d.row.pddCorrect) !== null && num(d.row.pddCorrect) < CORRECT_MAX);
+    case "man-clean":
+      return display.filter(d => !d.row.manDnf && num(d.row.manCones) === 0);
+    case "man-cones":
+      return display.filter(d => !d.row.manDnf && num(d.row.manCones) !== null && num(d.row.manCones) > 0);
+    case "podium":
+      return display.filter(d => d.place !== null && d.place <= 3);
+    case "no-place":
+      return display.filter(d => d.place === null);
+    case "has-data":
+      return display.filter(d => d.row.name.trim() || d.row.pddCorrect !== "" || d.row.pddTime !== "" || d.row.manCones !== "" || d.row.manTime !== "");
+    case "no-data":
+      return display.filter(d => !d.row.name.trim() && d.row.pddCorrect === "" && d.row.pddTime === "" && d.row.manCones === "" && d.row.manTime === "");
+    default:
+      return display;
+  }
+}
+
+function sortArrow(gender, field){
+  const ui = uiState[gender];
+  if(ui.sortField !== field) return `<span class="sort-arrow">↕</span>`;
+  return `<span class="sort-arrow active">${ui.sortDir === 1 ? "▲" : "▼"}</span>`;
+}
+
+function renderPanel(gender){
+  const panel = document.getElementById("panel-" + gender);
+  const rows = state[gender];
+  const ui = uiState[gender];
+
+  // 1. вычисляем итоги для всех строк
+  const computedById = {};
+  rows.forEach(r => { computedById[r.id] = computeRow(r); });
+
+  // 2. место считается по ПОЛНОМУ (неотфильтрованному) списку
+  const ranked = rows
+    .map(r => ({ id: r.id, overall: computedById[r.id].overall }))
+    .filter(r => r.overall !== null)
+    .sort((a, b) => a.overall - b.overall);
+  const placeById = {};
+  ranked.forEach((r, idx) => { placeById[r.id] = idx + 1; });
+
+  // 3. собираем отображаемый список
+  let display = rows.map(row => ({
+    row,
+    c: computedById[row.id],
+    place: placeById[row.id] || null
+  }));
+
+  // 4. фильтр (расширенный список по категориям)
+  display = applyFilter(display, ui.filter);
+
+  // 5. поиск по ФИО
+  if(ui.search.trim()){
+    const q = ui.search.trim().toLowerCase();
+    display = display.filter(d => d.row.name.toLowerCase().includes(q));
+  }
+
+  // 6. сортировка (пустые значения — всегда в конец)
+  if(ui.sortField){
+    const def = SORT_FIELDS[ui.sortField];
+    display.sort((a, b) => {
+      if(def.nullField){
+        const av = def.nullField(a), bv = def.nullField(b);
+        if(av === null && bv === null) return 0;
+        if(av === null) return 1;
+        if(bv === null) return -1;
+      }
+      return def.cmp(a, b) * ui.sortDir;
+    });
+  }
+
+  const sortPresetValue = ui.sortField ? `${ui.sortField}:${ui.sortDir}` : "";
+
+  let html = `
+    <div class="controls-bar">
+      <input type="text" id="search-${gender}" placeholder="Поиск по ФИО…" value="${escapeHtml(ui.search)}">
+      <select id="filter-${gender}" title="Фильтр">
+        ${FILTER_OPTIONS.map(o => `<option value="${o.value}" ${ui.filter === o.value ? "selected" : ""}>${o.label}</option>`).join("")}
+      </select>
+      <select id="sort-${gender}" title="Сортировка">
+        ${SORT_PRESETS.map(o => `<option value="${o.value}" ${sortPresetValue === o.value ? "selected" : ""}>${o.label}</option>`).join("")}
+      </select>
+      ${(ui.search || ui.filter !== "all" || ui.sortField) ? `<button class="clear-btn" id="clear-${gender}">Сбросить</button>` : ""}
+    </div>
+    <div class="table-scroll">
+    <table class="results">
+      <thead>
+        <tr class="group-row">
+          <th rowspan="2" class="sortable" data-sort="name">ФИО участника ${sortArrow(gender, "name")}</th>
+          <th class="g-pdd" colspan="3">ПДД (штраф ${PENALTY_PDD} сек / ошибка)</th>
+          <th class="g-man" colspan="3">Скоростное маневрирование (штраф ${PENALTY_CONE} сек / конус)</th>
+          <th rowspan="2" class="sortable" data-sort="total">Общее время, сек ${sortArrow(gender, "total")}</th>
+          <th rowspan="2" class="sortable" data-sort="place">Место ${sortArrow(gender, "place")}</th>
+          <th rowspan="2"></th>
+        </tr>
+        <tr class="sub-row">
+          <th>Прав. ответов (из ${CORRECT_MAX})</th>
+          <th>Время, сек</th>
+          <th class="sortable" data-sort="pdd">Итог ПДД ${sortArrow(gender, "pdd")}</th>
+          <th>Сбито конусов</th>
+          <th>Время, сек</th>
+          <th class="sortable" data-sort="man">Итог манёвр ${sortArrow(gender, "man")}</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  if(display.length === 0){
+    html += `<tr><td colspan="10" style="text-align:center; color:var(--chalk-dim); padding:18px;">Ничего не найдено</td></tr>`;
+  }
+
+  display.forEach(({ row, c, place }) => {
+    const placeClass = place === 1 ? "place-1" : place === 2 ? "place-2" : place === 3 ? "place-3" : "";
+    const dnfClass = (row.pddDnf || row.manDnf) ? "dnf-row" : "";
+
+    html += `
+      <tr class="${placeClass} ${dnfClass}" data-id="${row.id}">
+        <td class="name-cell">
+          <input type="text" value="${escapeHtml(row.name)}" placeholder="Фамилия Имя Отчество" data-field="name">
+        </td>
+
+        <td>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" value="${escapeHtml(row.pddCorrect)}" placeholder="—" data-field="pddCorrect" ${row.pddDnf ? "disabled" : ""}>
+        </td>
+        <td>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" value="${escapeHtml(row.pddTime)}" placeholder="—" data-field="pddTime" ${row.pddDnf ? "disabled" : ""}>
+          <div class="dnf-toggle">
+            <input type="checkbox" id="pdd-dnf-${gender}-${row.id}" data-field="pddDnf" ${row.pddDnf ? "checked" : ""}>
+            <label for="pdd-dnf-${gender}-${row.id}">не выполнено</label>
+          </div>
+        </td>
+        <td class="auto strong">${c.pddTotal !== null ? c.pddTotal : "—"}</td>
+
+        <td>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" value="${escapeHtml(row.manCones)}" placeholder="—" data-field="manCones" ${row.manDnf ? "disabled" : ""}>
+        </td>
+        <td>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" value="${escapeHtml(row.manTime)}" placeholder="—" data-field="manTime" ${row.manDnf ? "disabled" : ""}>
+          <div class="dnf-toggle">
+            <input type="checkbox" id="man-dnf-${gender}-${row.id}" data-field="manDnf" ${row.manDnf ? "checked" : ""}>
+            <label for="man-dnf-${gender}-${row.id}">не выполнено</label>
+          </div>
+        </td>
+        <td class="auto strong">${c.manTotal !== null ? c.manTotal : "—"}</td>
+
+        <td class="total-cell">${c.overall !== null ? c.overall : "—"}</td>
+        <td class="place-cell">${place ? place : "—"}</td>
+        <td><button type="button" class="row-del-btn" data-action="remove-selected" data-gender="${gender}" data-id="${row.id}" title="Удалить участника">✕</button></td>
+      </tr>
+    `;
+  });
+
+  html += `
+      </tbody>
+    </table>
+    </div>
+    <div class="row-actions">
+      <button class="btn primary" data-action="add-row" data-gender="${gender}" ${rows.length >= MAX_ROWS ? "disabled" : ""}>+ Добавить участника</button>
+      <span class="save-note" id="save-note-${gender}"></span>
+    </div>
+  `;
+
+  panel.innerHTML = html;
+
+  // --- редактируемые поля строк ---
+  const NUMERIC_FIELDS = ["pddCorrect", "pddTime", "manCones", "manTime"];
+  panel.querySelectorAll("input[data-field]").forEach(inp => {
+    const evt = inp.type === "checkbox" ? "change" : "input";
+    inp.addEventListener(evt, (e) => {
+      const tr = e.target.closest("tr");
+      const id = tr.dataset.id;
+      const field = e.target.dataset.field;
+      let val = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+      if(NUMERIC_FIELDS.includes(field)){
+        val = sanitizeNumeric(val, field);
+      }
+      const idx = state[gender].findIndex(r => r.id === id);
+      if(idx === -1) return;
+      state[gender][idx][field] = val;
+      scheduleSave();
+      renderPanel(gender);
+      requestAnimationFrame(() => {
+        const again = document.querySelector(
+          `#panel-${gender} tr[data-id="${id}"] [data-field="${field}"]`
+        );
+        if(again && e.target.type !== "checkbox"){
+          again.focus();
+          const v = again.value;
+          again.setSelectionRange(v.length, v.length);
+        }
+      });
+    });
+  });
+
+  // --- добавить / удалить (выбранного) участника ---
+  panel.querySelectorAll("[data-action]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const g = btn.dataset.gender;
+      if(btn.dataset.action === "add-row"){
+        if(state[g].length < MAX_ROWS){
+          state[g].push(emptyRow());
+          scheduleSave();
+          renderPanel(g);
+        }
+      } else if(btn.dataset.action === "remove-selected"){
+        const id = btn.dataset.id;
+        if(state[g].length <= 1) return;
+        const row = state[g].find(r => r.id === id);
+        const label = row && row.name.trim() ? row.name.trim() : "эту строку";
+        if(!confirm(`Удалить участника «${label}»?`)) return;
+        state[g] = state[g].filter(r => r.id !== id);
+        scheduleSave();
+        renderPanel(g);
+      }
+    });
+  });
+
+  // --- поиск ---
+  const searchInput = document.getElementById("search-" + gender);
+  if(searchInput){
+    searchInput.addEventListener("input", (e) => {
+      uiState[gender].search = e.target.value;
+      renderPanel(gender);
+      requestAnimationFrame(() => {
+        const again = document.getElementById("search-" + gender);
+        if(again){
+          again.focus();
+          again.setSelectionRange(again.value.length, again.value.length);
+        }
+      });
+    });
+  }
+
+  // --- фильтр ---
+  const filterSelect = document.getElementById("filter-" + gender);
+  if(filterSelect){
+    filterSelect.addEventListener("change", (e) => {
+      uiState[gender].filter = e.target.value;
+      renderPanel(gender);
+    });
+  }
+
+  // --- сортировка (выпадающий список-пресет) ---
+  const sortSelect = document.getElementById("sort-" + gender);
+  if(sortSelect){
+    sortSelect.addEventListener("change", (e) => {
+      const v = e.target.value;
+      if(!v){
+        uiState[gender].sortField = null;
+        uiState[gender].sortDir = 1;
+      } else {
+        const [field, dir] = v.split(":");
+        uiState[gender].sortField = field;
+        uiState[gender].sortDir = parseInt(dir, 10);
+      }
+      renderPanel(gender);
+    });
+  }
+
+  // --- сброс поиска/фильтра/сортировки ---
+  const clearBtn = document.getElementById("clear-" + gender);
+  if(clearBtn){
+    clearBtn.addEventListener("click", () => {
+      uiState[gender] = { search: "", filter: "all", sortField: null, sortDir: 1 };
+      renderPanel(gender);
+    });
+  }
+
+  // --- сортировка по заголовкам ---
+  panel.querySelectorAll("th.sortable").forEach(th => {
+    th.addEventListener("click", () => {
+      const field = th.dataset.sort;
+      if(uiState[gender].sortField === field){
+        uiState[gender].sortDir *= -1;
+      } else {
+        uiState[gender].sortField = field;
+        uiState[gender].sortDir = 1;
+      }
+      renderPanel(gender);
+    });
+  });
+}
+
+function escapeHtml(str){
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function renderAll(){
+  renderPanel("men");
+  renderPanel("women");
+}
+
+/* ----- tabs ----- */
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("panel-" + btn.dataset.gender).classList.add("active");
+  });
+});
+
+/* ----- обновить вручную ----- */
+document.getElementById("refresh-btn").addEventListener("click", manualRefresh);
+
+/* ----- login ----- */
+const loginScreen = document.getElementById("login-screen");
+const appEl = document.getElementById("app");
+const loginForm = document.getElementById("login-form");
+const pwInput = document.getElementById("pw-input");
+const loginError = document.getElementById("login-error");
+
+function showApp(){
+  loginScreen.style.display = "none";
+  appEl.style.display = "block";
+  initData();
+}
+
+loginForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  if(pwInput.value === SITE_PASSWORD){
+    sessionStorage.setItem("results_auth", "1");
+    showApp();
+  } else {
+    loginError.textContent = "Неверный пароль";
+    pwInput.value = "";
+    pwInput.focus();
+  }
+});
+
+document.getElementById("logout-btn").addEventListener("click", () => {
+  sessionStorage.removeItem("results_auth");
+  location.reload();
+});
+
+if(sessionStorage.getItem("results_auth") === "1"){
+  showApp();
+}
+</script>
+</body>
+</html>
