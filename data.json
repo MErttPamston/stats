@@ -65,7 +65,7 @@
       "pddDnf": false,
       "manTime": "",
       "manDnf": false,
-      "manErrors": "",
+      "manErrors": "3",
       "pddErrors": "2"
     }
   ]
