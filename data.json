@@ -30,7 +30,7 @@
       "pddDnf": false,
       "manTime": "",
       "manDnf": false,
-      "manErrors": "",
+      "manErrors": "60",
       "pddErrors": "2"
     },
     {
