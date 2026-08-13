@@ -6,9 +6,10 @@
       "pddCorrect": "20",
       "pddTime": "140",
       "pddDnf": false,
-      "manCones": "12",
       "manTime": "120",
-      "manDnf": false
+      "manDnf": false,
+      "manErrors": "12",
+      "pddErrors": "21"
     },
     {
       "id": "rmsrnvycuvfr2oj",
@@ -16,9 +17,10 @@
       "pddCorrect": "20",
       "pddTime": "120",
       "pddDnf": false,
-      "manCones": "10",
       "manTime": "130",
-      "manDnf": false
+      "manDnf": false,
+      "manErrors": "10",
+      "pddErrors": ""
     },
     {
       "id": "rmsrq8i8svu0x5l",
@@ -26,9 +28,10 @@
       "pddCorrect": "",
       "pddTime": "",
       "pddDnf": false,
-      "manCones": "",
       "manTime": "",
-      "manDnf": false
+      "manDnf": false,
+      "manErrors": "",
+      "pddErrors": ""
     },
     {
       "id": "rmsrrbzt2qcccvb",
@@ -36,9 +39,10 @@
       "pddCorrect": "",
       "pddTime": "",
       "pddDnf": false,
-      "manCones": "",
       "manTime": "",
-      "manDnf": false
+      "manDnf": false,
+      "manErrors": "",
+      "pddErrors": ""
     }
   ],
   "women": [
@@ -48,9 +52,10 @@
       "pddCorrect": "",
       "pddTime": "",
       "pddDnf": false,
-      "manCones": "",
       "manTime": "",
-      "manDnf": false
+      "manDnf": false,
+      "manErrors": "",
+      "pddErrors": ""
     },
     {
       "id": "rmsrnvyculuk124",
@@ -58,9 +63,10 @@
       "pddCorrect": "",
       "pddTime": "",
       "pddDnf": false,
-      "manCones": "",
       "manTime": "",
-      "manDnf": false
+      "manDnf": false,
+      "manErrors": "",
+      "pddErrors": ""
     },
     {
       "id": "rmsrnvycuj9laf8",
@@ -68,9 +74,10 @@
       "pddCorrect": "",
       "pddTime": "",
       "pddDnf": false,
-      "manCones": "",
       "manTime": "",
-      "manDnf": false
+      "manDnf": false,
+      "manErrors": "",
+      "pddErrors": ""
     }
   ]
 }
