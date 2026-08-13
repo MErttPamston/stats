@@ -64,7 +64,7 @@
       "pddTime": "76",
       "pddDnf": false,
       "manTime": "240",
-      "manDnf": false,
+      "manDnf": true,
       "manErrors": "3",
       "pddErrors": "2"
     }
