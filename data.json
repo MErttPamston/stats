@@ -16,7 +16,7 @@
       "pddCorrect": "20",
       "pddTime": "120",
       "pddDnf": false,
-      "manCones": "",
+      "manCones": "10",
       "manTime": "",
       "manDnf": false
     },
