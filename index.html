@@ -388,7 +388,7 @@ const SITE_PASSWORD = "qwerty";
 // Теперь: свой бэкенд на VPS (см. stats-server.js). Если выбрали вариант
 // с поддоменом — оставьте как есть. Если вариант с путём на домене Nota —
 // замените на "https://note.egkp.ru/stats-api/data".
-const WORKER_URL = "https://stats.egkp.ru/api/data";
+const WORKER_URL = "https://185-199-158-128.sslip.io/api/data";
 
 async function githubGetFile(){
   const res = await fetch(`${WORKER_URL}?_=${Date.now()}`);
